@@ -16,7 +16,7 @@ sub p1 {
     my $id = [/^Game (\d+)/g]->[0];
     s/^Game .*: //;
 
-    $max{$_->[1]} = max($max{$_->[1]}, $_->[0]) for map { [/(\d+)\s(.*)/g] } split /,|;\s?/;
+    $max{$_->[1]} = max $max{$_->[1]}, $_->[0] for map { [/(\d+)\s(.*)/g] } split /,|;\s?/;
 
     if (not $p2) {
       $sum += $id if $max{red} <= 12 && $max{green} <= 13 && $max{blue} <= 14;
