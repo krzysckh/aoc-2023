@@ -21,7 +21,7 @@ sub p1 {
     my ($id, $w, $y) = /^Card\s+(\d+):\s+(.*)\s+\|\s+(.*)/g;
     my @inter = intersect[split /\s+/, $w], [split /\s+/, $y];
     my $n = @inter > 0;
-    $n *= 2 for 2..scalar @inter;
+    $n *= 2 for 2..@inter;
     $sum += $n;
   }
 
@@ -46,7 +46,7 @@ sub p2 {
 
   for my $cur (0..@cards - 1) {
     $cards[$cur + $_]->n($cards[$cur + $_]->n + $cards[$cur]->n)
-      for 1..scalar @{$cards[$cur]->winning};
+      for 1..@{$cards[$cur]->winning};
   }
 
   $sum += $_->n for @cards;
