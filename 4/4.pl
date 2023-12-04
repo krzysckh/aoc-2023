@@ -19,8 +19,8 @@ sub p1 {
   my $sum = 0;
   while (<$f>) {
     my ($id, $w, $y) = /^Card\s+(\d+):\s+(.*)\s+\|\s+(.*)/g;
-    my @inter = intersect([split /\s+/, $w], [split /\s+/, $y]);
-    my $n = @inter ? 1 : 0;
+    my @inter = intersect[split /\s+/, $w], [split /\s+/, $y];
+    my $n = @inter > 0;
     $n *= 2 for 2..scalar @inter;
     $sum += $n;
   }
