@@ -1,6 +1,8 @@
-perl 5.pl
-p1: 
-.....
-p2:
-
 WARNING: this program is very slow. i WILL eventually find a way to optimize it.
+
+perl 5.pl
+p1: 993500720
+...
+...
+...
+p2: 4917124

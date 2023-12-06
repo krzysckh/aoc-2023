@@ -115,11 +115,10 @@ sub p2 {
     for (@seed_ranges) {
       if ($seed >= $_->[0] && $seed <= $_->[1]) {
         say "p2: $loc";
-        die;
+        die
       }
     }
   }
-  say "oki"
 }
 
 p1;
