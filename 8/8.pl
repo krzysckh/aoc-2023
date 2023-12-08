@@ -10,8 +10,6 @@ use Math::Utils qw(lcm);
 
 open my $f, '<', "./in" or die $@;
 
-use Data::Printer;
-
 sub p1 {
   my %map;
   my ($ctr, $cur) = (0, "AAA");
