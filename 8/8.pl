@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use warnings;
+no warnings;
 use feature 'say';
 
 use Class::Struct;
@@ -11,16 +11,13 @@ use Math::Utils qw(lcm);
 open my $f, '<', "./in" or die $@;
 
 sub p1 {
-  my %map;
   my ($ctr, $cur) = (0, "AAA");
+  my %map;
 
   my @instr = grep { not /\s/ } split //, <$f>;
   <$f>; # \n
 
-  while (<$f>) {
-    /(\w+) = \((\w+), (\w+)\)/;
-    $map{$1} = [$2, $3];
-  }
+  $map{$1} = [$2, $3] while <$f> =~ /(\w+) = \((\w+), (\w+)\)/;
 
   while (1) {
     $cur = $instr[$ctr++ % @instr] eq "L" ? $map{$cur}->[0] : $map{$cur}->[1];
@@ -31,17 +28,12 @@ sub p1 {
 }
 
 sub p2 {
-  my (%map, @start, @lengths, @instr);
-  my $ctr = 0;
+  my (%map, @start, @lengths, @instr, $ctr);
 
   @instr = grep { not /\s/ } split //, <$f>;
   <$f>; # \n
 
-  while (<$f>) {
-    /(\w+) = \((\w+), (\w+)\)/;
-    $map{$1} = [$2, $3];
-  }
-
+  $map{$1} = [$2, $3] while <$f> =~ /(\w+) = \((\w+), (\w+)\)/;
   push @start, $_ for grep { /..A/ } keys %map;
 
   for (@start) {
