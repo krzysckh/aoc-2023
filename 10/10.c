@@ -99,6 +99,7 @@ parsemap(void)
   }
 }
 
+__attribute__((unused))
 static
 void
 printmap(void)
@@ -166,6 +167,7 @@ set_distance(void)
   }
 }
 
+__attribute__((unused))
 static
 void
 print_with_distance(void)
@@ -215,8 +217,7 @@ static
 struct tg_ring*
 create_tg_ring(void)
 {
-  int npoints = 2 + get_full_distance(), i = 0, j = 0;
-  struct tg_ring *ret;
+  int npoints = 2 + get_full_distance(), i = 0;
   struct tg_point *points = malloc(sizeof(struct tg_point) * (npoints));
   /* idk if i can free those */
 
@@ -224,7 +225,7 @@ create_tg_ring(void)
          *prev = start->l;
 
   while (1) {
-    points[j++] = (struct tg_point){ cur->x, cur->y };
+    points[i++] = (struct tg_point){ cur->x, cur->y };
 
     if (cur->l == prev) {
       prev = cur;
@@ -237,7 +238,7 @@ create_tg_ring(void)
     if (cur == start) break;
   }
 
-  points[j] = (struct tg_point){ cur->x, cur->y };
+  points[i] = (struct tg_point){ cur->x, cur->y };
 
   return tg_ring_new(points, npoints);
 }
@@ -274,8 +275,6 @@ gp_write_points(void)
 {
   FILE *fp = fopen("gnd.dat", "w");
   int i = 0, n = 0;
-  pipe_t *cur = start,
-         *prev = start->l;
   struct tg_ring *p = create_tg_ring();
 
   if (fp == NULL) abort();

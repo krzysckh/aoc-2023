@@ -1,5 +1,3 @@
-$ wget https://raw.githubusercontent.com/tidwall/tg/main/tg.c
-$ wget https://raw.githubusercontent.com/tidwall/tg/main/tg.h
-$ clang tg.c 10.c -lm && ./a.out
+$ ./build.sh && ./a.out
 p1: 6870
 p2: 287
