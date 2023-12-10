@@ -1,4 +1,5 @@
-pt.2 TBD
-
-$ clang 10.c && ./a.out
+$ wget https://raw.githubusercontent.com/tidwall/tg/main/tg.c
+$ wget https://raw.githubusercontent.com/tidwall/tg/main/tg.h
+$ clang tg.c 10.c -lm && ./a.out
 p1: 6870
+p2: 287

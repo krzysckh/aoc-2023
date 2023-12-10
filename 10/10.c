@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <err.h>
+#include <unistd.h>
+
+#include <sys/wait.h>
+#include "tg.h"
 
 typedef enum
 {
@@ -19,7 +22,7 @@ typedef struct pipe_t
 {
   pipe_dir_t d;
   struct pipe_t *l, *r;
-  int distance;
+  int distance, x, y, is_loop;
 } pipe_t;
 
 static pipe_t *start = NULL;
@@ -142,6 +145,7 @@ set_distance(void)
       after_half = 0;
   while (1) {
     cur->distance = cur_dist;
+    cur->is_loop = 1;
     if (!after_half)
       cur_dist++;
     else
@@ -207,6 +211,107 @@ get_max(void)
   return max;
 }
 
+static
+struct tg_ring*
+create_tg_ring(void)
+{
+  int npoints = 2 + get_full_distance(), i = 0, j = 0;
+  struct tg_ring *ret;
+  struct tg_point *points = malloc(sizeof(struct tg_point) * (npoints));
+  /* idk if i can free those */
+
+  pipe_t *cur = start,
+         *prev = start->l;
+
+  while (1) {
+    points[j++] = (struct tg_point){ cur->x, cur->y };
+
+    if (cur->l == prev) {
+      prev = cur;
+      cur = cur->r;
+    } else {
+      prev = cur;
+      cur = cur->l;
+    }
+
+    if (cur == start) break;
+  }
+
+  points[j] = (struct tg_point){ cur->x, cur->y };
+
+  return tg_ring_new(points, npoints);
+}
+
+static
+void
+gp_write_poly(void)
+{
+  FILE *fp = fopen("poly.dat", "w");
+  pipe_t *cur = start,
+         *prev = start->l;
+  if (fp == NULL) abort();
+
+  while (1) {
+    if (cur->l == prev) {
+      prev = cur;
+      cur = cur->r;
+    } else {
+      prev = cur;
+      cur = cur->l;
+    }
+
+    fprintf(fp, "%d %d\n", cur->x, cur->y);
+
+    if (cur == start) break;
+  }
+
+  fclose(fp);
+}
+
+static
+void
+gp_write_points(void)
+{
+  FILE *fp = fopen("gnd.dat", "w");
+  int i = 0, n = 0;
+  pipe_t *cur = start,
+         *prev = start->l;
+  struct tg_ring *p = create_tg_ring();
+
+  if (fp == NULL) abort();
+
+  for (; i < map_sz; ++i) {
+    if (map[i].is_loop == 0) {
+      if (tg_geom_intersects_xy((struct tg_geom*)p, map[i].x, map[i].y)) {
+        n++;
+        fprintf(fp, "%d %d\n", map[i].x, map[i].y);
+      }
+    }
+  }
+
+  printf("p2: %d\n", n);
+  fclose(fp);
+}
+
+static
+void
+exec_gnuplot(void)
+{
+  if (fork() == 0)
+    execlp("gnuplot", "gnuplot", "-p", "plot.gp", NULL);
+  else
+    wait(NULL);
+}
+
+static
+void
+write_gnuplot_data(void)
+{
+  gp_write_poly();
+  gp_write_points();
+  exec_gnuplot();
+}
+
 int
 main(void)
 {
@@ -215,13 +320,21 @@ main(void)
   if (!in) abort();
 
   map = malloc(sizeof(pipe_t) * map_sz);
-  while ((c = fgetc(in)) != EOF)
-    if (c != '\n')
+  while ((c = fgetc(in)) != EOF) {
+    if (c != '\n') {
+      map[i].x = i % MAP_W;
+      map[i].y = i / MAP_W;
+      map[i].is_loop = 0;
       map[i++].d = c;
+    }
+  }
+  fclose(in);
+
   parsemap();
   set_distance();
   /*print_with_distance();*/
   printf("p1: %d\n", get_max());
+  write_gnuplot_data();
 
   free(map);
 }
