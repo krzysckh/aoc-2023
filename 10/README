@@ -1,0 +1,4 @@
+pt.2 TBD
+
+$ clang 10.c && ./a.out
+p1: 6870
