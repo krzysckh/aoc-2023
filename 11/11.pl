@@ -5,34 +5,26 @@ use warnings;
 use feature 'say';
 
 use File::Slurp qw(read_file);
-use List::Util qw(all max min);
+use List::Util qw(all reduce);
 use Class::Struct;
 
-struct (
-  Galaxy => {
-    id => '$',
-    x  => '$',
-    y  => '$',
-  }
-);
+struct Galaxy => {
+  id => '$',
+  x  => '$',
+  y  => '$',
+};
 
 sub expand {
   my ($by, @v) = @_;
-  my (@addx, @addy);
-  my @ret;
+  my (@addx, @addy, @ret);
 
-  for (@v) {
-    if (defined $addy[-1]) {
-      push @addy, (all { $_ eq "." } @$_) ? $addy[-1] + $by : $addy[-1];
-    } else {
-      push @addy, (all { $_ eq "." } @$_) ? $by : 0;
-    }
-  }
+  push @addy, (all { $_ eq "." } @$_) ? $addy[-1] + $by :
+    $addy[-1] ? $addy[-1] : 0 for @v;
 
   for (my $i = 0; $i < @v; ++$i) {
     push @addx, (all { $_ eq "." } map { $_->[$i] } @v) ?
-      (defined $addx[-1] ? $addx[-1] : 0) + $by
-      : (defined $addx[-1] ? $addx[-1] : 0)
+      ($addx[-1] ? $addx[-1] : 0) + $by
+      : $addx[-1] ? $addx[-1] : 0
   }
 
   for my $y (0..@v-1) {
@@ -61,18 +53,13 @@ sub p1 {
     }
   }
 
-  my $sum = 0;
-  for (@pairs) {
-    my @xs = ($_->[0]->x, $_->[1]->x);
-    my @ys = ($_->[0]->y, $_->[1]->y);
-    $sum += (max(@xs)-min(@xs)) + (max(@ys)-min(@ys));
-  }
 
-  say $p2 ? "p2: " : "p1: ", $sum
+  say $p2 ? "p2: " : "p1: ", reduce { $a + $b }
+    map { abs($_->[0]->x - $_->[1]->x) + abs($_->[0]->y - $_->[1]->y) } @pairs;
 }
 
 sub p2 {
-  p1 "okay";
+  p1 "kiedy w radiu bedzie juz tylko radio maryja";
 }
 
 p1;
