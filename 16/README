@@ -1,3 +1,16 @@
 $ ./build.sh && ./16
 p1: 6883
 p2: 7228
+
+write a gif
+$ mkdir ppm
+$ clang -DWRITEPPM 16.c && ./a.out
+$ cd ppm
+$ for i in *.ppm; do convert $i $i.png; done
+$ rm *.ppm
+$ gifski --fps 50 -Q 100 --extra --output=a.gif `find . -type f -name '*.png' | sed 's/^\.\///' | sort -n | grep -v '[13579].ppm.png$'`
+  ^^^^^^       ^^    ^^^^^^^^^^^          ^^^^^  ^^^^^^^^^^^^^^        ^^^^^^                     ^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^
+create a gif   |       |          save to a.gif   use all files, with png extension                 |                    +- and use only odd numbered files,
+         with 50 frames|per second                                                               sort them numerically      for faster plyback
+                       |
+                    and a high quality

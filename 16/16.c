@@ -28,6 +28,58 @@ static Tile *map;
 static int w = 0;
 static int h = 0;
 
+static int ppmn;
+static bool shouldwrite;
+
+void
+tile2rgb(Tile t, unsigned char *s)
+{
+  if (t.marked) {
+    s[0] = 255;
+    s[1] = 0;
+    s[2] = 0;
+    return;
+  }
+
+  switch (t.t) {
+  case empty:   s[0] = 255, s[1] = 255, s[2] = 255; break;
+  case lmirror: s[0] = 0, s[1] = 128, s[2] = 0; break;
+  case rmirror: s[0] = 0, s[1] = 255, s[2] = 0; break;
+  case vsplit:  s[0] = 0, s[1] = 0, s[2] = 128; break;
+  case hsplit:  s[0] = 0, s[1] = 0, s[2] = 255; break;
+  }
+}
+
+void
+writeppm(int n)
+{
+#ifdef WRITEPPM
+  char fname[512];
+  unsigned char s[3];
+  int i, j;
+  FILE *fp;
+
+  sprintf(fname, "ppm/%d.ppm", n);
+  fp = fopen(fname, "w");
+
+  if (fp == NULL)
+    abort();
+
+  fprintf(fp, "P6\n%d %d 255\n", w, h);
+  for (i = 0; i < h; ++i) {
+    for (j = 0; j < h; ++j) {
+      tile2rgb(at(j, i), s);
+      fprintf(fp, "%c%c%c", s[0], s[1], s[2]);
+    }
+  }
+
+
+  fclose(fp);
+#else
+  (void)n;
+#endif
+}
+
 void
 printmap(void)
 {
@@ -59,6 +111,9 @@ get_energized(void)
 void
 run(int x, int y, int dx, int dy, int lastx, int lasty)
 {
+  if (shouldwrite) {
+    writeppm(ppmn++);
+  }
   if (x < 0 || y < 0 || x >= w || y >= h)
     return;
 
@@ -184,10 +239,12 @@ main(void)
   memcpy(map_orig, map, sizeof(Tile) * 128 * 128);
 
   //printmap();
+  shouldwrite = 1;
   run(0, 0, 1, 0, 0, 0);
 
   printf("p1: %d\n", get_energized());
 
+  shouldwrite = 0;
   findcomb();
 
   free(map);
