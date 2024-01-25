@@ -5,7 +5,7 @@
 
 #ifdef __linux__
 #include <bsd/err.h>
-#elifdef _WIN32
+#elif defined(_WIN32)
 void
 errx(int n, char* s, ...)
 {
@@ -52,7 +52,6 @@ typedef struct
   int n_conns;
 
   Vector2 p;
-  Vector2 v;
   bool canmove;
 } Component;
 
@@ -128,7 +127,6 @@ void
 render(void)
 {
   int i;
-  float dt, V;
   Vector2 text_pt, text_sz, delta_mouse, mp;
   Component *currently_pressed = NULL;
   char buf[512];
@@ -145,7 +143,6 @@ render(void)
     {
       ClearBackground(BACKGROUND_COLOR);
       mp = GetMousePosition();
-      dt = GetFrameTime();
 
       if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         if (box_drawing) {
@@ -189,9 +186,6 @@ render(void)
         draw_connections(&components[i]);
 
       for (i = 0; i < ids->n; ++i) {
-        components[i].p.x = components[i].p.x + components[i].v.x*dt;
-        components[i].p.x = components[i].p.x + components[i].v.x*dt;
-
         DrawCircleV(components[i].p, COMP_RADIUS, COMP_COLOR);
         text_sz = MeasureTextEx(GetFontDefault(), components[i].nam, FONT_SIZE, 0);
         text_pt = (Vector2) {
@@ -199,9 +193,6 @@ render(void)
           components[i].p.y - text_sz.y/2
         };
         DrawText(components[i].nam, text_pt.x, text_pt.y, FONT_SIZE, DARK_TEXT_COLOR);
-
-        components[i].v.x = MAX(0, components[i].v.x - 1.f*dt);
-        components[i].v.y = MAX(0, components[i].v.y - 1.f*dt);
       }
 
       snprintf(buf, 512, "%f", max_line_len);
@@ -263,6 +254,7 @@ read_file(FILE *fp)
     buf = realloc(buf, read + 512);
     read += fread(buf + read, 1, 512, fp);
   }
+  buf[read] = 0;
 
   return buf;
 }
@@ -312,7 +304,7 @@ fix_conns(void)
 void
 get_components(char *f)
 {
-  char name[64] = {0}, line[128] = {0}, buf[16] = {0}, *lbuf, *tok, *lfree;
+  char name[64] = {0}, line[128] = {0}, *lbuf, *tok, *lfree;
   Component *cur;
 
   while (sscanf(f, "%3s: %[a-zA-Z0-9 ]", name, line) == 2) {
