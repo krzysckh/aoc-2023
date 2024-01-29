@@ -134,6 +134,11 @@ render(void)
   Rectangle box;
   bool box_drawing = false;
 
+#ifdef __OpenBSD__
+  srand_deterministic(0);
+#else
+  srand(0);
+#endif
   randomize_component_positions();
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(800, 600, "aoc day 25");
@@ -166,8 +171,8 @@ render(void)
           for (i = 0; i < ids->n; ++i)
             if (CheckCollisionPointCircle(mp, components[i].p, COMP_RADIUS)) {
               currently_pressed = &components[i];
-              delta_mouse.x = components[i].p.x - mp.x;
-              delta_mouse.y = components[i].p.y - mp.y;
+              delta_mouse.x = mp.x - components[i].p.x;
+              delta_mouse.y = mp.y - components[i].p.y;
               break;
             }
         } else {

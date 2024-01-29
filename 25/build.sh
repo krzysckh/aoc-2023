@@ -1,6 +1,12 @@
 #!/bin/sh
 
-clang -Wall -Wextra -g -I/usr/local/include -L/usr/local/lib -o 25 25.c -lraylib -lm
+if [ `uname -s` = 'OpenBSD' ]; then
+  glfw=-lglfw
+else
+  glfw=""
+fi
+
+clang -Wall -Wextra -g -I/usr/local/include -L/usr/local/lib -o 25 25.c "$glfw" -lraylib -lm
 
 win() {
   [ -f "libraylib.a" ] || wget -O libraylib.a https://pub.krzysckh.org/libraylib.a
@@ -10,4 +16,4 @@ win() {
                          -static -o aoc-2023-d25.exe
 }
 
-win
+[ `uname -s` = 'OpenBSD' ] || win
